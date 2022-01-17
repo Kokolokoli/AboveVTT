@@ -408,9 +408,9 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 				}
 			}
 			else {
-				console.log("fetchChapters >> Initiating. Self is: ", self);
-				window.ScenesHandler.fetchChapters(keyword, iframe.contents().find(".adventure-chapter-header a,li >strong>a").first().attr('href'), self);
-				/* iframe.contents().find(".adventure-chapter-header a,li >strong>a").each(function(idx) {
+				/* console.log("fetchChapters >> Initiating. Self is: ", self);
+				window.ScenesHandler.fetchChapters(keyword, iframe.contents().find(".adventure-chapter-header a,li >strong>a").first().attr('href'), self); */
+				iframe.contents().find(".adventure-chapter-header a,li >strong>a").each(function(idx) {
 					var title = $(this).html();
 					var url = $(this).attr('href');
 					var ch_keyword = url.replace('https://www.dndbeyond.com', '').replace('/sources/' + keyword + "/", '');
@@ -420,7 +420,7 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 						url: url,
 						scenes: [],
 					};
-				}); */
+				});
 			}
 			iframe.remove();
 			self.persist();
@@ -444,8 +444,8 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 			console.log("fetchChapters >> online. Treating chapter : ", linkToChapter);
 			console.log("fetchChapters >>> Setting data from Chapters Page");			
 			
-			title = $("div.p-article-content.u-typography-format>h1.compendium-hr").attr('text');
-			ch_keyword = linkToChapter.replace('https://www.dndbeyond.com/sources/' + source_keyword + "/", '');
+			title = $("div.p-article-content>h1.compendium-hr", $(event.target).contents()).innerHTML;// Returns undefined
+			ch_keyword = linkToChapter.replace('https://www.dndbeyond.com', '').replace('/sources/' + source_keyword + "/", ''); // splice instead?
 			self.sources[source_keyword].chapters[ch_keyword] = {
 				type: 'dnb',
 				title: title, // undefined
@@ -467,9 +467,10 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 				return;
 			}
 
-			linkToChapter = nextChapter[0].attr('href'); // nextChapter is undefined;
+			linkToChapter = 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + nextChapter.first().attr('href');// clean link here
 			console.log("fetchChapters >>> Loading next link in iframe: "+ linkToChapter);
 			iframe.attr('src', linkToChapter); // Trigger the load of next chapter
+			// This could work but way too slow. Perhaps do this for a selected chapter instead.
 		})		
 		
 		$("#site").append(iframe);

@@ -526,7 +526,8 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 					.children() //select all the children
 					.remove()   //remove all the children
 					.end()  //again go back to selected element
-					.text();
+					.text()
+					.slice(0,90); // limit the length of the caption shown to three lines
 
 				var thumb = $(this).find("img").attr('src');
 

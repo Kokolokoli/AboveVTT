@@ -501,6 +501,18 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 
 		f.on("load", function(event) {
 			var iframe = $(event.target);
+			console.log('BUILDSCENES is INITIATING...');
+
+			if(!iframe.attr('src').includes(chapter_url)){
+				console.log("BUILDSCENES OVER");
+				iframe.remove();
+				self.persist();
+				console.log('INVOKO CALLBACK');
+				callback();
+				return
+			};
+			
+
 			iframe.contents().find("figure").each(function(idx) { // FIGURE + FIGCAPTION. 
 				var id = $(this).attr('id');
 				if (typeof id == typeof undefined)
@@ -614,11 +626,8 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 
 				});
 			}
-
-			iframe.remove();
-			self.persist();
-			console.log('INVOKO CALLBACK');
-			callback();
+			let nextChapter = $("div.top-next-page>a", $(event.target).contents());
+			if (nextChapter.length > 0) iframe.attr('src', 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + nextChapter.first().attr('href').replace('./', ''));
 		});
 	}
 

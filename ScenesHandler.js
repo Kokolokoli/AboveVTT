@@ -581,7 +581,7 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 				return
 			};
 
-			iframe.attr('src', 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + );
+			iframe.attr('src', nextSectionUrl );
 		});
 	}
 

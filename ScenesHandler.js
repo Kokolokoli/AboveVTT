@@ -428,54 +428,6 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 		});
 	}
 
-	fetchChapters(source_keyword, startChapter, self) { // TODO Test this
-
-		let reachedLastChapter = false;
-		let nextChapter = [];
-		let ch_keyword = "";
-		let title = "";
-		let linkToChapter = startChapter;
-
-		let iframe = $("<iframe name='chapter-scraper' src='" + linkToChapter + "'></iframe>");
-		iframe.hide();
-		console.log("fetchChapters >> Loaded CHAPTER-SCRAPER --- ", iframe)
-		
-		iframe.on("load", function(event) {
-			console.log("fetchChapters >> online. Treating chapter : ", linkToChapter);
-			console.log("fetchChapters >>> Setting data from Chapters Page");			
-			
-			title = $("div.p-article-content>h1.compendium-hr", $(event.target).contents()).innerHTML;// Returns undefined
-			ch_keyword = linkToChapter.replace('https://www.dndbeyond.com', '').replace('/sources/' + source_keyword + "/", ''); // splice instead?
-			self.sources[source_keyword].chapters[ch_keyword] = {
-				type: 'dnb',
-				title: title, // undefined
-				url: linkToChapter, 
-				scenes: [],
-			};
-			
-			console.log("fetchChapters >>>>>> Loaded the following chapter data => ", self.sources[source_keyword].chapters[ch_keyword]);
-
-			nextChapter = $("div.top-next-page>a", $(event.target).contents());
-			
-			console.log("fetchChapters >>> NextChapter is ", nextChapter);
-			
-			reachedLastChapter = !nextChapter.length > 0; 
-
-			if (reachedLastChapter){
-				console.log("fetchChapters >>> Reached last chapter OR paywall came up. Exiting...");
-				iframe.remove();
-				return;
-			}
-
-			linkToChapter = 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + nextChapter.first().attr('href');// clean link here
-			console.log("fetchChapters >>> Loading next link in iframe: "+ linkToChapter);
-			iframe.attr('src', linkToChapter); // Trigger the load of next chapter
-			// This could work but way too slow. Perhaps do this for a selected chapter instead.
-		})		
-		
-		$("#site").append(iframe);
-	}
-
 	build_scenes(source_keyword, chapter_keyword, callback) {
 		var self = this;
 		console.log("cerco scene source: " + source_keyword + " | chapter: " + chapter_keyword);
@@ -502,16 +454,6 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 		f.on("load", function(event) {
 			var iframe = $(event.target);
 			console.log('BUILDSCENES is INITIATING...');
-
-			if(!iframe.attr('src').includes(chapter_url)){
-				console.log("BUILDSCENES OVER");
-				iframe.remove();
-				self.persist();
-				console.log('INVOKO CALLBACK');
-				callback();
-				return
-			};
-			
 
 			iframe.contents().find("figure").each(function(idx) { // FIGURE + FIGCAPTION. 
 				var id = $(this).attr('id');
@@ -627,8 +569,19 @@ class ScenesHandler { // ONLY THE DM USES THIS OBJECT
 
 				});
 			}
-			let nextChapter = $("div.top-next-page>a", $(event.target).contents());
-			if (nextChapter.length > 0) iframe.attr('src', 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + nextChapter.first().attr('href').replace('./', ''));
+			let nextSectionLink = $("div.top-next-page>a", $(event.target).contents());
+			let nextSectionUrl = nextSectionLink.length != 0 ? chapter_url.replace(chapter_keyword, nextSectionLink.first().attr('href').replace('./', '')) : '';
+
+			if(!nextSectionUrl.includes(chapter_url)){
+				console.log("BUILDSCENES OVER");
+				iframe.remove();
+				self.persist();
+				console.log('INVOKO CALLBACK');
+				callback();
+				return
+			};
+
+			iframe.attr('src', 'https://www.dndbeyond.com/sources/' + source_keyword + "/" + );
 		});
 	}
 
